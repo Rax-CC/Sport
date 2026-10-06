@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Suivi sport et nutrition</title>
+<style>
+:root{--bg:#eef1f5;--c:#fff;--t:#14213d;--m:#5d6b82;--a:#2f5bea;--ok:#0f9d6e;--b:#d9dfe8}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1420;--c:#172033;--t:#e8edf7;--m:#94a3bd;--a:#6d8cff;--ok:#38c995;--b:#26324a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--t);font:16px/1.45 "Avenir Next",ui-rounded,system-ui,sans-serif;padding-bottom:76px}
+#h{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;gap:6px;padding:10px 12px;overflow-x:auto}
+#m{max-width:560px;margin:0 auto;padding:4px 12px}
+h2{font-size:1.25rem;margin:6px 0}
+p{margin:6px 0}
+.cd{background:var(--c);border:1px solid var(--b);border-radius:14px;padding:12px 14px;margin:10px 0}
+.m{color:var(--m);font-size:.9rem}
+.ch{border:1px solid var(--b);background:var(--c);color:var(--t);border-radius:99px;padding:7px 14px;font:inherit;white-space:nowrap}
+.ch.on{background:var(--a);border-color:var(--a);color:#fff}
+.bt{width:100%;border:0;border-radius:12px;background:var(--a);color:#fff;font:inherit;font-weight:600;padding:13px;margin:10px 0}
+.bt.s{background:transparent;color:var(--m);border:1px solid var(--b)}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.st{display:flex;gap:8px;align-items:center;margin:6px 0}
+.st span{width:20px;color:var(--m)}
+input,select{font:inherit;color:var(--t);background:var(--bg);border:1px solid var(--b);border-radius:10px;padding:9px;width:100%;min-width:0;margin:4px 0}
+.sg{color:var(--ok);font-size:.92rem;margin:2px 0 6px}
+.big{font-size:3.4rem;font-weight:800;line-height:1;color:var(--a)}
+details{margin-top:8px}summary{color:var(--a);cursor:pointer}
+nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--c);border-top:1px solid var(--b)}
+nav button{flex:1;border:0;background:none;color:var(--m);font:inherit;font-size:.78rem;padding:9px 0}
+nav button.on{color:var(--a);font-weight:700}
+:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="h"></div><main id="m"></main><nav id="n"></nav>
+<script>
+const K='fit1',O=['A','B','C','D'];
+const G={perte:'🔥 Perte de gras',muscle:'💪 Prise de muscle',recomp:'⚖️ Recomposition'};
+// id: [nom, séries, répétitions, but, exécution, à éviter, alternative]
+const E={
+dc:['Développé couché','4','6-8','Pectoraux, épaules, triceps.','Omoplates serrées, pieds ancrés, barre au bas des pectoraux, poussée sans rebond.','Fesses décollées, rebond, coudes verrouillés.','Développé haltères ou machine pectorale'],
+di:['Développé incliné haltères','3','8-12','Haut des pectoraux.','Banc à 30-45°, coudes à environ 45° du buste, remontée complète sans claquer.','Banc trop vertical, amplitude réduite.','Développé incliné Smith'],
+de:['Développé épaules machine','3','8-12','Deltoïdes.','Dos plaqué, poussée sans cambrer, descente à hauteur des oreilles.','Cambrer le dos, hausser les épaules.','Développé épaules haltères assis'],
+el:['Élévations latérales','3','12-15','Épaules (largeur).','Coudes légèrement fléchis, monter à l’horizontale, descente lente.','Balancer le corps, monter trop haut.','Élévations à la poulie basse'],
+tr:['Extension triceps poulie','3','10-15','Triceps.','Coudes collés au corps, extension complète, retour contrôlé.','Coudes qui avancent, élan du buste.','Barre au front'],
+hs:['Hack squat','4','6-10','Quadriceps, fessiers.','Dos plaqué, pieds largeur d’épaules, descente jusqu’à 90° ou plus, poussée dans les talons.','Bassin décollé, genoux rentrés, jambes verrouillées.','Presse à cuisses'],
+pr:['Presse à cuisses','3','10-12','Quadriceps, fessiers.','Pieds largeur d’épaules, descente à environ 90°, poussée sans verrouiller.','Bassin décollé, genoux vers l’intérieur.','Squat gobelet'],
+lc:['Leg curl assis','3','10-12','Ischio-jambiers.','Coussin sur les chevilles, flexion complète, retour lent.','Hanches décollées, mouvement trop rapide.','Leg curl couché'],
+le:['Leg extension','3','12-15','Quadriceps (isolation).','Dos plaqué, extension complète, pause d’une seconde en haut.','Claquer en haut, charge excessive.','Fentes statiques légères'],
+md:['Mollets debout','4','10-15','Mollets (gastrocnémien).','Amplitude complète, pause en haut et en bas.','Rebondir, amplitude courte.','Mollets à la presse'],
+tv:['Tirage vertical','4','8-12','Grand dorsal (largeur du dos).','Poitrine sortie, tirer vers le haut de la poitrine, coudes vers les hanches.','Se pencher en arrière, tirer avec les bras.','Tractions assistées'],
+rp:['Rowing poulie assis','3','8-12','Milieu du dos.','Dos droit, tirer vers le nombril, serrer les omoplates.','Balancer le buste, dos rond.','Rowing machine'],
+rh:['Rowing haltère (par bras)','3','8-12','Dos et stabilité.','Main et genou sur le banc, coude vers la hanche, dos plat.','Tourner le buste, charge excessive.','Rowing machine'],
+fp:['Face pull','3','12-15','Arrière d’épaules, posture.','Poulie à hauteur du visage, tirer vers le front en écartant les mains.','Charge trop lourde, hausser les épaules.','Oiseau haltères'],
+cu:['Curl haltères','3','10-12','Biceps.','Coudes fixes, montée contrôlée, descente lente.','Balancer le buste, coudes mobiles.','Curl poulie basse'],
+sr:['Soulevé de terre roumain','3','8-10','Ischio-jambiers, fessiers.','Jambes presque tendues, bassin vers l’arrière, barre le long des jambes, dos plat.','Dos rond, descendre trop bas.','Version haltères ou leg curl'],
+sp:['Split squat (par jambe)','3','8-12','Jambes et équilibre.','Buste droit, genou avant aligné avec le pied, descente verticale.','Genou qui rentre, pas trop court.','Fentes ou presse à une jambe'],
+ht:['Hip thrust','3','8-12','Fessiers.','Haut du dos sur le banc, pousser dans les talons, bassin à l’horizontale.','Cambrer le bas du dos.','Pont fessier avec haltère'],
+cr:['Crunch poulie','3','12-15','Abdominaux.','À genoux, enrouler le buste vers le bassin en expirant.','Tirer avec les bras, bouger les hanches.','Crunch au sol'],
+ga:['Gainage (en secondes)','3','30-45','Sangle abdominale.','Corps aligné, abdos et fessiers contractés, respiration régulière.','Bassin qui s’affaisse ou qui monte.','Gainage sur les genoux'],
+ma:['Mollets assis','3','12-15','Mollets (soléaire).','Genoux à 90°, amplitude complète, pause d’une seconde en haut.','Rebondir, amplitude courte.','Mollets debout']};
+const SN={A:['Haut, poussée',['dc','di','de','el','tr']],B:['Bas',['hs','pr','lc','le','md']],C:['Haut, tirage',['tv','rp','rh','fp','cu']],D:['Bas et abdos',['sr','sp','ht','cr','ga','ma']]};
+
+let S;try{S=JSON.parse(localStorage.getItem(K))}catch(e){}
+S=S||{p:[],cur:null};
+let tab='home',sess=null,xs=null;
+const $=s=>document.querySelector(s);
+const me=()=>S.p.find(x=>x.id===S.cur);
+const iso=d=>d.toLocaleDateString('sv'),today=()=>iso(new Date());
+const mon=()=>{const d=new Date();d.setDate(d.getDate()-(d.getDay()+6)%7);return iso(d)};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const next=p=>p.ss.length?O[(O.indexOf(p.ss.at(-1).s)+1)%4]:'A';
+const lastL=(p,id)=>p.lg.filter(l=>l.e===id).at(-1);
+const e1=(k,r)=>k?(r>1?k*(1+r/30):k):r; // 1RM estimé (Epley)
+
+function sug(id,l){
+  const [lo,hi]=E[id][2].split('-').map(Number);
+  if(!l)return'Première fois : choisis une charge confortable et vise '+E[id][2]+' répétitions.';
+  const kg=Math.max(...l.s.map(x=>x[0])),ok=l.s.every(x=>x[1]>=hi);
+  if(!kg)return ok?'🔥 Ajoute quelques secondes cette fois.':'🎯 Vise '+hi+' sur chaque série.';
+  return ok?`🔥 Tu as réussi toutes les séries : passe à ${kg+2} kg (${lo}-${hi} reps).`:`🎯 Reste à ${kg} kg et vise ${hi} reps sur chaque série.`;
+}
+function chart(v){
+  if(v.length<2)return'<p class=m>Il faut au moins deux mesures pour afficher le graphique.</p>';
+  const W=300,H=120,mn=Math.min(...v),r=(Math.max(...v)-mn)||1;
+  const q=v.map((y,i)=>[10+i*(W-20)/(v.length-1),H-10-(y-mn)/r*(H-20)]);
+  return`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Évolution"><polyline fill="none" stroke="var(--a)" stroke-width="2.5" points="${q.map(z=>z.join(',')).join(' ')}"/>${q.map(z=>`<circle cx="${z[0]}" cy="${z[1]}" r="3.5" fill="var(--a)"/>`).join('')}</svg>`;
+}
+
+function vHome(p){
+  const w=p.wt,nx=next(p),wk=p.ss.filter(x=>x.d>=mon()).length,ls=p.ss.at(-1);
+  const dl=w.length>1?w.at(-1).kg-w[0].kg:0;
+  const b=l=>Math.max(...l.s.map(x=>x[0]));
+  const pr=Object.keys(E).map(id=>{const L=p.lg.filter(l=>l.e===id);return L.length>1?[id,b(L[0]),b(L.at(-1))]:0}).filter(x=>x&&x[2]>x[1]).slice(0,4);
+  return`<div class=cd><h2>${esc(p.n)}</h2><p class=m>${G[p.g]}</p>
+<p>${w.length?'Poids : <b>'+w.at(-1).kg+' kg</b>'+(w.length>1?' ('+(dl>0?'+':'')+dl.toFixed(1)+' kg depuis le début)':''):'Ajoute ton poids dans l’onglet Profil.'}</p></div>
+<div class=cd><p class=m>Prochaine séance</p><div class=big>${nx}</div><p>${SN[nx][0]}</p>
+<p class=m>Cette semaine : ${wk} / ${p.spw} séances${ls?'. Dernière séance : '+ls.s+' le '+ls.d:''}</p>
+<button class=bt onclick="tab='sport';R()">Commencer la séance</button></div>
+<div class=cd><h2>Progression</h2>${pr.length?pr.map(x=>`<p>${E[x[0]][0]} : ${x[1]} → ${x[2]} kg</p>`).join(''):'<p class=m>Enregistre deux séances d’un même exercice pour voir ta progression.</p>'}</div>`;
+}
+
+function vSport(p){
+  const nx=next(p),s=sess||nx;
+  let h=`<div class=row>${O.map(k=>`<button class="ch ${k==s?'on':''}" onclick="sess='${k}';R()">${k}${k==nx?' (prochaine)':''}</button>`).join('')}</div><h2>Séance ${s} : ${SN[s][0]}</h2>`;
+  SN[s][1].forEach(id=>{
+    const e=E[id],l=lastL(p,id);
+    h+=`<div class=cd><b>${e[0]}</b> <span class=m>${e[1]} × ${e[2]}</span><div class=sg>${sug(id,l)}</div>`;
+    for(let i=0;i<+e[1];i++){const q=l&&(l.s[i]||l.s.at(-1));
+      h+=`<div class=st><span>${i+1}</span><input id="k${id}${i}" type=number step=.5 inputmode=decimal placeholder="${q?q[0]+' kg':'kg'}"><input id="r${id}${i}" type=number inputmode=numeric placeholder="${q?q[1]+' reps':'reps'}"></div>`}
+    h+=`<details><summary>Fiche de l’exercice</summary><p><b>But :</b> ${e[3]}</p><p><b>Exécution :</b> ${e[4]}</p><p><b>À éviter :</b> ${e[5]}</p><p><b>Alternative :</b> ${e[6]}</p></details></div>`;
+  });
+  return h+`<button class=bt onclick="done('${s}')">Enregistrer la séance</button>`;
+}
+function done(s){
+  const p=me(),d=today();let n=0;
+  SN[s][1].forEach(id=>{const a=[];
+    for(let i=0;i<+E[id][1];i++){const r=+$('#r'+id+i).value,k=+$('#k'+id+i).value;if(r>0)a.push([k||0,r])}
+    if(a.length){p.lg.push({d,e:id,s:a});n++}});
+  if(!n)return alert('Saisis au moins une série (charge et répétitions).');
+  p.ss.push({d,s});sess=null;tab='home';R();
+}
+
+function vProg(p){
+  const ids=Object.keys(E).filter(id=>p.lg.some(l=>l.e===id));
+  if(!ids.length)return'<div class=cd><p>Aucune performance enregistrée pour l’instant. Termine une séance pour voir ta progression ici.</p></div>';
+  const id=ids.includes(xs)?xs:ids[0],L=p.lg.filter(l=>l.e===id);
+  const v=L.map(l=>Math.max(...l.s.map(x=>e1(x[0],x[1]))));
+  return`<select onchange="xs=this.value;R()">${ids.map(i=>`<option value="${i}" ${i==id?'selected':''}>${E[i][0]}</option>`).join('')}</select>
+<div class=cd><b>1RM estimé</b> <span class=m>(meilleur : ${Math.round(Math.max(...v))})</span>${chart(v)}</div>
+<h2>Dernières séances</h2>`+L.slice(-8).reverse().map(l=>`<div class=cd><span class=m>${l.d}</span><br>${l.s.map(x=>x[0]+' kg × '+x[1]).join(' ; ')}</div>`).join('');
+}
+
+function vProf(p){
+  const w=p.wt;
+  return`<div class=cd><h2>Profil</h2>
+<label class=m>Prénom</label><input value="${esc(p.n)}" onchange="me().n=this.value.trim()||me().n;R()">
+<label class=m>Objectif</label><select onchange="me().g=this.value;R()">${Object.keys(G).map(k=>`<option value="${k}" ${k==p.g?'selected':''}>${G[k]}</option>`).join('')}</select>
+<label class=m>Séances prévues cette semaine</label><select onchange="me().spw=+this.value;R()">${[3,4].map(n=>`<option ${n==p.spw?'selected':''}>${n}</option>`).join('')}</select></div>
+<div class=cd><h2>Poids</h2><div class=st><input id=wi type=number step=.1 inputmode=decimal placeholder="Poids en kg"><button class=ch onclick="addW()">Ajouter</button></div>${chart(w.map(x=>x.kg))}
+<p class=m>${w.slice(-5).reverse().map(x=>x.d+' : '+x.kg+' kg').join('<br>')}</p></div>
+<button class="bt s" onclick="delP()">Supprimer ce profil</button>`;
+}
+function addW(){const v=parseFloat($('#wi').value.replace(',','.'));if(v>0){me().wt.push({d:today(),kg:v});R()}}
+function addP(){
+  const n=prompt('Prénom du profil ?');if(!n||!n.trim())return;
+  const p={id:Date.now(),n:n.trim(),g:'recomp',spw:4,wt:[],lg:[],ss:[]};
+  S.p.push(p);S.cur=p.id;tab='prof';R();
+}
+function delP(){
+  if(!confirm('Supprimer ce profil et tout son historique ?'))return;
+  S.p=S.p.filter(x=>x.id!==S.cur);S.cur=S.p[0]?S.p[0].id:null;tab='home';R();
+}
+
+function R(){
+  if(!me()&&S.p.length)S.cur=S.p[0].id;
+  const p=me();
+  $('#h').innerHTML=S.p.map(x=>`<button class="ch ${x.id===S.cur?'on':''}" onclick="S.cur=${x.id};sess=null;R()">${esc(x.n)}</button>`).join('')+'<button class=ch onclick="addP()" aria-label="Ajouter un profil">＋ Profil</button>';
+  $('#n').innerHTML=[['home','🏠','Accueil'],['sport','🏋️','Sport'],['prog','📈','Progrès'],['prof','👤','Profil']].map(t=>`<button class="${t[0]==tab?'on':''}" onclick="tab='${t[0]}';R()">${t[1]}<br>${t[2]}</button>`).join('');
+  $('#m').innerHTML=p?({home:vHome,sport:vSport,prog:vProg,prof:vProf}[tab])(p):'<div class=cd><h2>Bienvenue</h2><p>Crée un premier profil pour commencer ton suivi.</p><button class=bt onclick="addP()">Créer un profil</button></div>';
+  try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}
+  window.scrollTo(0,0);
+}
+R();
+</script>
+</body>
+</html>
