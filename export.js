@@ -1,9 +1,9 @@
 // Export des données pour un coach ou une IA : résumé lisible + sauvegarde JSON.
 let xw=4;
-const xd=n=>{const d=new Date();d.setDate(d.getDate()-n*7);return iso(d)};
+const xdt=n=>{const d=new Date();d.setDate(d.getDate()-n*7);return iso(d)};
 
 function xTxt(p){
-  const from=xd(xw),L=[],gl=G[p.g].replace(/^\S+\s/,'');
+  const from=xdt(xw),L=[],gl=G[p.g].replace(/^\S+\s/,'');
   L.push(`# Suivi sport et nutrition, export du ${today()} (${xw} dernières semaines)`);
   L.push(`Profil : ${p.n}. Objectif : ${gl}. Salle : Basic-Fit. Rythme : ${p.spw} séances par semaine (rotation A haut poussée, B bas, C haut tirage, D bas et abdos).`);
   if(p.nu&&p.nu.a&&p.nu.h)L.push(`Âge ${p.nu.a} ans, taille ${p.nu.h} cm, sexe ${p.nu.sx=='f'?'féminin':'masculin'}.`);
