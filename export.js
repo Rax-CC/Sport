@@ -22,7 +22,8 @@ function xTxt(p){
     if(h.length>1&&id!='ga')L.push(`  Évolution du 1RM estimé : ${b(h[0])} → ${b(h.at(-1))} kg`);
   });
   if(!p.lg.some(l=>l.d>=from))L.push('Aucune performance enregistrée sur la période.');
-  const nf=Object.keys(E).filter(id=>!p.lg.some(l=>l.e===id&&l.d>=from)).map(id=>E[id][0]);
+  const dn2=new Set(p.lg.filter(l=>l.d>=from).map(l=>l.e.split('~')[0]));
+  const nf=Object.keys(E).filter(id=>!id.includes('~')&&!dn2.has(id)).map(id=>E[id][0]);
   if(nf.length&&nf.length<Object.keys(E).length)L.push('Exercices non réalisés sur la période : '+nf.join(', ')+'.');
 
   L.push('','## Alimentation');
